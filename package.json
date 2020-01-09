@@ -1,0 +1,25 @@
+{
+    "name": "selenium",
+    "version": "1.0.0",
+    "description": "selenium basic use check website",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Trương Thanh Hùng - i am HERO",
+    "license": "ISC",
+    "dependencies": {
+        "phantom": "^6.0.3",
+        "selenium-webdriver": "^3.6.0",
+        "ejs": "^2.6.1",
+        "body-parser": "^1.18.3",
+        "express": "^4.17.1",
+        "pg": "^7.12.1",
+        "sequelize": "^5.19.6",
+        "socket.io": "^2.1.1",
+        "validator": "^11.1.0"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.2"
+    }
+}

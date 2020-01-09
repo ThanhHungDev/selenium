@@ -1,0 +1,260 @@
+
+0. trước khi cài đặt
+Đầu tiên, bạn cần cập nhật Ubuntu với hai câu lệnh sau:
+	apt-get update
+	apt-get upgrade
+Khởi động lại VPS và kết nối lại bằng puttty
+
+Bước 2: Cài đặt Nginx
+Nginx đã có sẵn trong repository, bạn chỉ cần cài đặt với câu lệnh apt-get quen thuộc:
+	apt-get install -y nginx
+	
+Sau khi Nginx đã được cài đặt, khởi động Nginx và bật nó tự chạy khi khởi động lại VPS bằng 2 câu lệnh sau:
+	systemctl start nginx
+	systemctl enable nginx
+	
+Bạn có thể kiểm tra để thấy nginx đã chạy ở cổng 80 bằng câu lệnh netstat:
+	netstat -plntu
+
+
+
+Bước 3: Cài đặt PHP-7.3
+		[
+			sudo add-apt-repository ppa:ondrej/php
+			sudo apt-get update
+			sudo apt-get install php7.3
+			
+			nhớ search google cài thêm GD extention cho hệ thống nap image
+			apt-get update
+			apt-get -y install unzip zip  php7.3-cli, php7.3-common, php7.3-curl, php7.3-fpm, php7.3-gd, php7.3-json, php7.3-mbstring, php7.3-mysql, php7.3-opcache, php7.3-pgsql, php7.3-readline, php7.3-xml
+
+            * sau khi cài đặt xong kiểm tra những pakage có chữ php trong hệ thống bằng lệnh: 
+            dpkg --get-selections | grep php
+            * những extention sẽ góp mặt cần lưu ý : 
+
+            {libapache2-mod-php7.2                           install
+            php-cli-prompt                                  install
+            php-common                                      install
+            php-composer-ca-bundle                          install
+            php-composer-semver                             install
+            php-composer-spdx-licenses                      install
+            php-json-schema                                 install
+            php-psr-log                                     install
+            php-symfony-console                             install
+            php-symfony-debug                               install
+            php-symfony-filesystem                          install
+            php-symfony-finder                              install
+            php-symfony-polyfill-mbstring                   install
+            php-symfony-process                             install
+            php7.2                                          install
+            php7.2-cli                                      install
+            php7.2-common                                   install
+            php7.2-curl                                     install
+            php7.2-fpm                                      install
+            php7.2-gd                                       install
+            php7.2-json                                     install
+            php7.2-mbstring                                 install
+            php7.2-mysql                                    install
+            php7.2-opcache                                  install
+            php7.2-pgsql                                    install
+            php7.2-readline                                 install
+            php7.2-xml 
+            }
+		]
+    * kiểm tra php cài thành công không 
+    php -v
+
+    output 
+    PHP 7.3.0-1+ubuntu16.04.1+deb.sury.org+1 (cli) (built: Dec 6 2018 20:24:27) ( NTS )
+    Copyright (c) 1997-2018 The PHP Group
+    Zend Engine v3.3.0-dev, Copyright (c) 1998-2018 Zend Technologies
+    with Zend OPcache v7.3.0-1+ubuntu16.04.1+deb.sury.org+1, Copyright (c) 1999-2018, by Zend Technologies
+
+	* PHP-FPM chạy tự động
+Bây giờ chúng ta chạy PHP-FPM và bật nó chạy tự động khi khởi động lại VPS.
+	systemctl start php7.3-fpm || sudo systemctl stop php-fpm
+	systemctl enable php7.3-fpm
+
+Mặc định PHP-FPM sẽ chạy ở file sock trên Ubuntu. Bạn có thể test lại với câu lệnh sau:
+	netstat -pl | grep php7.3-fpm
+
+    * Thay đổi phiên bản PHP
+Để đặt PHP 7.0 làm mặc định, hãy chạy:
+
+update-alternatives --set php /usr/bin/php7.0
+Để đặt PHP 7.2 làm mặc định, hãy chạy:
+
+update-alternatives --set php /usr/bin/php7.2
+Để đặt PHP 7.3 làm mặc định, hãy chạy:
+
+update-alternatives --set php /usr/bin/php7.3
+
+Bước 4.1 Cài đặt Maria DB
+Cài đặt Maria DB sử dụng lệnh sau:
+	apt-get install -y mariadb-server mariadb-client
+Sau khi Maria DB được cài đặt, chạy Maria DB và bật nó tự chạy với lệnh sau:
+	systemctl start mysql
+	systemctl enable mysql
+Maria DB sẽ start ở cổng 3306
+	netstat -plntu
+Bây giờ bạn chạy câu lệnh sau để tăng cường bảo mật mysql:
+	mysql_secure_installation
+Nhập vào mật khẩu root, loại bỏ user ẩn danh, tắt truy cập root từ xa vân vân
+	Set root password? [Y/n] Y
+	 Remove anonymous users? [Y/n] Y
+	 Disallow root login remotely? [Y/n] Y
+	 Remove test database and access to it? [Y/n] Y
+	 Reload privilege tables now? [Y/n] Y
+
+
+Bước 5: Cài đặt PHP Composer
+Composer là bộ quản lý package cho ngôn ngữ lập trình PHP.
+ Trên Ubuntu 18.04 Composer đã có sẵn trong repository do vậy bạn có thể cài đặt bằng câu lệnh apt.
+
+Cài đặt PHP Composer bằng câu lệnh sau:
+	sudo apt-get install -y composer
+Sau khi cài đặt thành công, chạy lệnh composer bạn sẽ nhìn thấy kết quả như bên dưới:
+	composer -v
+
+
+
+Bước 6: Cấu hình virtual host nginx 
+Bước này chúng ta sẽ tạo virtual host 
+đi tới thư mục cấu hình nginx và tạo một virtual host “laravel” trong thư mục “site-available”.
+
+cd /etc/nginx/
+nano sites-available/laravel.conf
+
+Paste cấu hình như sau. Nhớ thay IP của mình bằng domain của bạn.
+
+server {
+    listen 80;
+    listen [::]:80 ipv6only=on;
+
+    # Log files for Debugging
+    access_log /var/log/nginx/laravel-access.log;
+    error_log /var/log/nginx/laravel-error.log;
+
+    # Webroot Directory for Laravel project
+    root /var/www/laravel/public;
+    index index.php index.html index.htm;
+
+    # Your Domain Name
+    server_name herowebe.com www.herowebe.com;
+
+    location / {
+            try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    # PHP-FPM Configuration Nginx
+    location ~ \.php$ {
+            try_files $uri =404;
+            fastcgi_split_path_info ^(.+\.php)(/.+)$;
+            fastcgi_pass unix:/var/run/php/php7.3-fpm.sock;
+            fastcgi_index index.php;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            include fastcgi_params;
+    }
+}
+Lưu lại và thoái khỏi nano save : ctrl O , thoats : ctrl X
+Tiếp theo chúng ta sẽ tạo thư mục cho project Laravel. Ở đây chúng ta sẽ sử dụng thư mục “var/www/laravel”. 
+nhưng không tạo ngay bây giờ
+chúng ta chờ bước 7 cài laravel 1 lần luôn nhé. (missing)
+
+Bây giờ bạn kích hoạt virtual host bằng tạo một symlink file “laravel” tới thư mục “sites-enabled”. 
+Sau đó test lại cấu hình nginx để chắc chắn rằng không có lỗi nào xảy ra.
+	ln -s /etc/nginx/sites-available/laravel.conf /etc/nginx/sites-enabled/
+	nginx -t
+Bây giờ bạn restart lại nginx
+	systemctl restart nginx
+Bước 7: Cài đặt Laravel
+Đầu tiên bạn cần cài đặt tiện ích unzip với lệnh sau:
+	apt-get install unzip
+Di chuyển tới thư mục laravel chúng ta đã tạo ở bước trên
+	cd /var/www/
+Cài đặt Laravel với composer. Có hai cách cài đặt Laravel: 
+	1. cài đặt sử dụng Laravel Installer và cài đặt Laravel thông qua Composer create project. Chúng ta sẽ cài đặt sử dụng Composer create project
+		composer create-project laravel/laravel laravel
+		composer create-project laravel/laravel laravel 5.4 --prefer-dist
+Chúng ta cần thay đổi quyền sở hữu thư mục project Laravel về user ‘www-data’, và thay đổi permission thư mục thành 755.
+chown -R www-data:root /var/www/herowebe
+chmod 755 /var/www/herowebe/storage
+chus ys quyeenf 777
+Bước 8: Kiểm tra
+Bây giờ bạn mở trình duyệt và truy cập bằng tên miền của bạn.
+******************************************************
+
+
+
+
+
+
+
+ghi chú cài phpmyadmin trong nginx ubuntu thật: 
+xóa mysql sudo apt-get purge mysql*
+test: 
+mysql -u root -p
+thấy : 
+Enter password: 
+ERROR 2002 (HY000): Can't connect to local MySQL server through socket '/var/run/mysqld/mysqld.sock' (2 "No such file or directory")
+cài : sudo apt-get install mysql-server
+thử : mysql -u root -p
+Enter password: 
+ERROR 1698 (28000): Access denied for user 'root'@'localhost'
+sudo mysql -u root -p
+Enter password: 
+
+mysql> USE mysql;
+mysql> SELECT User, Host, plugin FROM mysql.user;
++------------------+-----------+-----------------------+
+| User             | Host      | plugin                |
++------------------+-----------+-----------------------+
+| root             | localhost | auth_socket           |
++------------------+-----------+-----------------------+
+mysql> UPDATE user SET plugin='mysql_native_password' WHERE User='root';
+mysql> FLUSH PRIVILEGES;
+mysql> exit;
+sau đó restart : service mysql restart
+thử : 
+mysql -u root -p
+Enter password: 
+ERROR 1045 (28000): Access denied for user 'root'@'localhost' (using password: YES)
+nhưng : mysql -u root
+Welcome to the MySQL monitor.  Commands end with ; or \g. ------> thành công
+nên : mysqladmin -u root password 123456789 
+sau đó thử : mysql -u root   -----> thất bại nhưng : 
+mysql -u root -p
+Enter password: 
+--------------------> thành công, lúc này cài đặt mysql có vẻ thành công r
+sudo apt-get install phpmyadmin
+sudo apt-get install php5.6-mysql
+cd /etc/nginx/sites-available  sau đó sudo gedit thanhhung.com.conf
+sudo ln -s /etc/nginx/sites-available/thanhhung.com /etc/nginx/sites-enabled/thanhhung.com
+service nginx restart
+$ service php5.6-fpm restart
+
+
+
+
+45.32.8.214
+q,6Q[HvMm2z{e*@n
+
+những setting ban đầu cho vps
+** để gennerate ssh 
+Thực hiện câu lệnh sau để tạo Public key
+
+# ssh-keygen -t rsa
+sau khi thực hiện câu lệnh này hệ thống sẽ yêu cầu bạn nhập passphrase 
+(tại đây bạn không cần nhập cũng được ấn enter cho đến khi kết thúc, nhưng mình khuyên bạn nên nhập vào trường này vì nó giống bảo mật 2 lớp cho VPS của bạn.)
+
+*** thêm ssh vào vps 
+mkdir ~/.ssh
+
+chmod 700 ~/.ssh
+
+nano ~/.ssh/authorized_keys
+
+--> dán ssh public 
+
+
+https://viblo.asia/p/design-pattern-in-oop-part-1-WrJvYKdAeVO
