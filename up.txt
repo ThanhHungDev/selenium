@@ -255,6 +255,16 @@ chmod 700 ~/.ssh
 nano ~/.ssh/authorized_keys
 
 --> dán ssh public 
+Để đảm bảo không có thể đăng nhập vào VPS của bạn bằng mật khẩu root và user nữa bạn cần vào file sshd_config
 
+#   vi /etc/ssh/sshd_config
+
+     Tìm dòng -> PasswordAuthentication yes 
+
+     Sau đó sửa yes -> no
+
+     Hãy lưu lại và restart sshd
+
+# systemctl restart sshd 
 
 https://viblo.asia/p/design-pattern-in-oop-part-1-WrJvYKdAeVO
