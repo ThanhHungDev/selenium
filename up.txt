@@ -26,7 +26,9 @@ Bước 3: Cài đặt PHP-7.3
 			
 			nhớ search google cài thêm GD extention cho hệ thống nap image
 			apt-get update
-			apt-get -y install unzip zip  php7.3-cli, php7.3-common, php7.3-curl, php7.3-fpm, php7.3-gd, php7.3-json, php7.3-mbstring, php7.3-mysql, php7.3-opcache, php7.3-pgsql, php7.3-readline, php7.3-xml
+			apt-get -y install unzip zip  php7.3-cli, php7.3-common, php7.3-curl, 
+			php7.3-fpm, php7.3-gd, php7.3-json, php7.3-mbstring, php7.3-mysql, 
+			php7.3-opcache, php7.3-pgsql, php7.3-readline, php7.3-xml
 
             * sau khi cài đặt xong kiểm tra những pakage có chữ php trong hệ thống bằng lệnh: 
             dpkg --get-selections | grep php
