@@ -16,7 +16,7 @@
         "express": "^4.17.1",
         "pg": "^7.12.1",
         "sequelize": "^5.19.6",
-        "socket.io": "^2.1.1",
+        "socket.io": "^2.4.0",
         "validator": "^11.1.0"
     },
     "devDependencies": {
